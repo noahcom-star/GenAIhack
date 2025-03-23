@@ -3,7 +3,17 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { parseTranscription } from '@/lib/utils/transcriptionParser';
 
+const VAPI_PRIVATE_KEY = process.env.VAPI_PRIVATE_API_KEY;
+
 export async function POST(req: Request) {
+  if (!VAPI_PRIVATE_KEY) {
+    console.error('VAPI_PRIVATE_API_KEY is not set');
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 }
+    );
+  }
+
   try {
     const supabase = createRouteHandlerClient({ cookies });
     
@@ -44,6 +54,7 @@ export async function POST(req: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${VAPI_PRIVATE_KEY}`
       },
       body: JSON.stringify({
         transcription: conversation,
