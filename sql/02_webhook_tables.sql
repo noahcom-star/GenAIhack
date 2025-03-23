@@ -10,12 +10,29 @@ create table if not exists participant_conversations (
   updated_at timestamp with time zone default now()
 );
 
--- Create indexes for participant_conversations
+-- Create participant_profiles table if it doesn't exist
+create table if not exists participant_profiles (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users not null,
+  skills text[] default array[]::text[],
+  interests text[] default array[]::text[],
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  unique(user_id)
+);
+
+-- Create indexes after tables are created
 create index if not exists idx_participant_conversations_user on participant_conversations(user_id);
 create index if not exists idx_participant_conversations_call on participant_conversations(call_id);
+create index if not exists idx_participant_profiles_user on participant_profiles(user_id);
 
--- Add updated_at trigger for participant_conversations
+-- Add updated_at triggers
 create trigger set_timestamp_participant_conversations
 before update on participant_conversations
+for each row
+execute function update_updated_at_column();
+
+create trigger set_timestamp_participant_profiles
+before update on participant_profiles
 for each row
 execute function update_updated_at_column(); 
