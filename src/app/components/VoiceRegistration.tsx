@@ -26,6 +26,8 @@ export default function VoiceRegistration({
         throw new Error('You must be logged in to use voice registration');
       }
       
+      console.log('Starting voice registration with user ID:', user.id, 'and hackathon ID:', hackathonId);
+      
       // Start the Vapi call with user and hackathon IDs
       const newCallId = await startVapiCall({
         userId: user.id,
@@ -48,37 +50,33 @@ export default function VoiceRegistration({
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">Voice Registration</h2>
+    <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <h2 className="text-xl font-bold mb-4">Voice Registration</h2>
+      <p className="text-gray-600 mb-4">
+        Tell us about yourself! Our AI assistant will call you to learn about your skills and interests 
+        to help match you with the perfect hackathon teammates.
+      </p>
       
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md">
           {error}
         </div>
       )}
       
-      {!callId ? (
+      {callId ? (
+        <div className="mb-4 p-3 bg-green-100 text-green-800 rounded-md">
+          Your call has been initiated! You should receive a call shortly.
+          <p className="text-sm mt-2">Call ID: {callId}</p>
+        </div>
+      ) : (
         <button
           onClick={startRegistration}
           disabled={isLoading}
-          className={`w-full py-3 px-4 rounded-md text-white font-medium ${
-            isLoading
-              ? 'bg-blue-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
+          className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
         >
           {isLoading ? 'Starting Call...' : 'Start Voice Registration'}
         </button>
-      ) : (
-        <div className="text-center">
-          <p className="text-lg mb-2">Call in progress!</p>
-          <p className="text-sm text-gray-600">Call ID: {callId}</p>
-        </div>
       )}
-      
-      <p className="mt-4 text-sm text-gray-600">
-        {callId ? 'Call in progress!' : 'Click the button above to start a voice call with our AI assistant. They&apos;ll ask you about your skills, interests, and what you&apos;d like to build.'}
-      </p>
     </div>
   );
 } 
