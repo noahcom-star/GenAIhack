@@ -96,15 +96,33 @@ export async function POST(req: Request) {
               
               const { error: profileError } = await supabase
                 .from('participant_profiles')
-                .upsert({
-                  user_id: userId,
+                .update({
                   skills: mergedSkills,
                   interests: mergedInterests,
                   updated_at: new Date().toISOString()
-                });
+                })
+                .eq('user_id', userId);
 
               if (profileError) {
-                console.log('[PUBLIC WEBHOOK] Error updating profile', profileError);
+                // If update fails (no existing record), try insert
+                if (profileError.code === 'PGRST116') {
+                  const { error: insertError } = await supabase
+                    .from('participant_profiles')
+                    .insert({
+                      user_id: userId,
+                      skills: mergedSkills,
+                      interests: mergedInterests,
+                      updated_at: new Date().toISOString()
+                    });
+                  
+                  if (insertError) {
+                    console.log('[PUBLIC WEBHOOK] Error inserting profile', insertError);
+                  } else {
+                    console.log('[PUBLIC WEBHOOK] Profile inserted successfully');
+                  }
+                } else {
+                  console.log('[PUBLIC WEBHOOK] Error updating profile', profileError);
+                }
               } else {
                 console.log('[PUBLIC WEBHOOK] Profile updated successfully');
               }
