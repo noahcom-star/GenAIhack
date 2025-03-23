@@ -9,7 +9,7 @@ interface Hackathon {
   name: string;
   start_date: string;
   end_date: string;
-  status: 'upcoming' | 'active' | 'completed';
+  status: 'draft' | 'active' | 'completed';
   created_at: string;
 }
 
@@ -35,7 +35,9 @@ export default function OrganizerDashboard() {
           .order('created_at', { ascending: false });
 
         if (fetchError) throw fetchError;
-        setHackathons(data || []);
+        
+        const typedData = (data || []) as unknown as Hackathon[];
+        setHackathons(typedData);
       } catch (err) {
         console.error('Error loading hackathons:', err);
         setError('Failed to load hackathons');
@@ -46,6 +48,19 @@ export default function OrganizerDashboard() {
 
     loadHackathons();
   }, []);
+
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -104,11 +119,7 @@ export default function OrganizerDashboard() {
                         </div>
                       </div>
                       <div>
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${hackathon.status === 'upcoming' ? 'bg-yellow-100 text-yellow-800' : 
-                            hackathon.status === 'active' ? 'bg-green-100 text-green-800' : 
-                            'bg-gray-100 text-gray-800'}`}
-                        >
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(hackathon.status)}`}>
                           {hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}
                         </span>
                       </div>
