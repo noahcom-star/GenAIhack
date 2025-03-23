@@ -54,126 +54,36 @@ export async function POST(req: Request) {
                 hackathon_id: hackathonId,
                 transcript: transcript.text,
                 call_id: body.call.id,
-                confidence: transcript.confidence
+                confidence: transcript.confidence,
+                raw_response: body // Store the entire webhook response for reference
               })
               .select();
 
             if (transcriptError) {
               console.log('[PUBLIC WEBHOOK] Error saving transcript', transcriptError);
-            } else {
-              console.log('[PUBLIC WEBHOOK] Transcript saved successfully', { insertId: insertData?.[0]?.id });
+              return NextResponse.json({ error: 'Failed to save transcript' }, { status: 500 });
             }
 
-            // Extract skills and interests
-            const newSkills = extractSkills(transcript.text);
-            const newInterests = extractInterests(transcript.text);
-            
-            console.log('[PUBLIC WEBHOOK] Extracted profile data', { skills: newSkills, interests: newInterests });
-            
-            // Get existing profile
-            const { data: existingProfile } = await supabase
-              .from('participant_profiles')
-              .select('skills, interests')
-              .eq('user_id', userId)
-              .single();
-
-            // Merge existing and new skills/interests
-            const mergedSkills = Array.from(new Set([
-              ...(existingProfile?.skills || []),
-              ...newSkills
-            ]));
-            const mergedInterests = Array.from(new Set([
-              ...(existingProfile?.interests || []),
-              ...newInterests
-            ]));
-            
-            // Update user profile in Supabase if we have new data
-            if (newSkills.length > 0 || newInterests.length > 0) {
-              console.log('[PUBLIC WEBHOOK] Updating participant profile', {
-                mergedSkills,
-                mergedInterests
-              });
-              
-              const { error: profileError } = await supabase
-                .from('participant_profiles')
-                .update({
-                  skills: mergedSkills,
-                  interests: mergedInterests,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', userId);
-
-              if (profileError) {
-                // If update fails (no existing record), try insert
-                if (profileError.code === 'PGRST116') {
-                  const { error: insertError } = await supabase
-                    .from('participant_profiles')
-                    .insert({
-                      user_id: userId,
-                      skills: mergedSkills,
-                      interests: mergedInterests,
-                      updated_at: new Date().toISOString()
-                    });
-                  
-                  if (insertError) {
-                    console.log('[PUBLIC WEBHOOK] Error inserting profile', insertError);
-                  } else {
-                    console.log('[PUBLIC WEBHOOK] Profile inserted successfully');
-                  }
-                } else {
-                  console.log('[PUBLIC WEBHOOK] Error updating profile', profileError);
-                }
-              } else {
-                console.log('[PUBLIC WEBHOOK] Profile updated successfully');
-              }
-            }
+            console.log('[PUBLIC WEBHOOK] Transcript saved successfully', { insertId: insertData?.[0]?.id });
+            return NextResponse.json({ success: true, transcriptId: insertData?.[0]?.id });
           } else {
-            console.log('[PUBLIC WEBHOOK] No user_id found in custom_data, skipping database updates');
+            console.log('[PUBLIC WEBHOOK] No user_id found in custom_data, skipping database update');
+            return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
           }
         } catch (error) {
           console.log('[PUBLIC WEBHOOK] Error processing transcript', error);
+          return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
         }
       } else {
         console.log('[PUBLIC WEBHOOK] No transcript available in completed call');
+        return NextResponse.json({ error: 'No transcript in call data' }, { status: 400 });
       }
     } else {
       console.log('[PUBLIC WEBHOOK] Non-completed call event received', { type: body.type });
+      return NextResponse.json({ error: 'Unsupported event type' }, { status: 400 });
     }
-
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.log('[PUBLIC WEBHOOK] Error in webhook', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-}
-
-// Simple function to extract skills from transcript text
-function extractSkills(text: string): string[] {
-  const skillKeywords = [
-    'javascript', 'typescript', 'react', 'node', 'python', 'java', 'c++', 
-    'html', 'css', 'sql', 'nosql', 'mongodb', 'postgresql', 'mysql',
-    'aws', 'azure', 'gcp', 'cloud', 'docker', 'kubernetes', 'devops',
-    'mobile', 'android', 'ios', 'swift', 'kotlin', 'flutter', 'react native',
-    'machine learning', 'ai', 'data science', 'blockchain', 'web3',
-    'ui', 'ux', 'design', 'product management', 'agile', 'scrum'
-  ];
-  
-  return skillKeywords.filter(skill => 
-    text.toLowerCase().includes(skill.toLowerCase())
-  );
-}
-
-// Simple function to extract interests from transcript text
-function extractInterests(text: string): string[] {
-  const interestKeywords = [
-    'web development', 'mobile development', 'game development', 'ai', 
-    'machine learning', 'data science', 'blockchain', 'web3', 'ar', 'vr',
-    'iot', 'robotics', 'cybersecurity', 'cloud computing', 'devops',
-    'ui/ux', 'product design', 'fintech', 'healthtech', 'edtech', 'sustainability',
-    'social impact', 'open source'
-  ];
-  
-  return interestKeywords.filter(interest => 
-    text.toLowerCase().includes(interest.toLowerCase())
-  );
 } 
