@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
 import { getSupabaseClient } from '@/lib/supabase/client';
 
+// Set a secret key for validating webhook requests
+// This should match what you set in Vapi dashboard
+const WEBHOOK_SECRET = process.env.VAPI_WEBHOOK_SECRET || "hackbuddysecret123";
+
 // Simplified webhook handler that doesn't require authentication
 export async function POST(req: Request) {
   console.log('[PUBLIC WEBHOOK] Received webhook request');
   
   try {
+    // Check X-VAPI-SECRET header for validation
+    const secret = req.headers.get('x-vapi-secret');
+    if (!secret || secret !== WEBHOOK_SECRET) {
+      console.log('[PUBLIC WEBHOOK] Invalid or missing secret');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Parse the request body
     const body = await req.json();
     console.log('[PUBLIC WEBHOOK] Request body:', JSON.stringify(body));

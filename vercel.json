@@ -3,5 +3,18 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "api/public-webhook/**": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/public-webhook(.*)",
+      "dest": "/api/public-webhook$1",
+      "continue": true
+    }
+  ]
 } 
