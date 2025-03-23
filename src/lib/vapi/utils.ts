@@ -54,6 +54,8 @@ export async function startVapiCall(customData?: { userId: string; hackathonId: 
       throw new Error('VAPI API key is not configured');
     }
 
+    console.log('Starting Vapi call with custom data:', customData);
+
     const response = await fetch('https://api.vapi.ai/call', {
       method: 'POST',
       headers: {
@@ -69,10 +71,13 @@ export async function startVapiCall(customData?: { userId: string; hackathonId: 
     });
 
     if (!response.ok) {
-      throw new Error('Failed to start Vapi call');
+      const errorText = await response.text();
+      console.error('Failed to start Vapi call:', errorText);
+      throw new Error(`Failed to start Vapi call: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('Vapi call response:', data);
     return data.call_id;
   } catch (error) {
     console.error('Error starting Vapi call:', error);

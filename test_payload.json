@@ -1,0 +1,1 @@
+{"type":"call.completed","call":{"id":"test-call-id","transcript":{"text":"I have skills in javascript and react, and I am interested in web development","confidence":0.9},"custom_data":{"userId":"test-user-id","hackathonId":"test-hackathon-id"}}}

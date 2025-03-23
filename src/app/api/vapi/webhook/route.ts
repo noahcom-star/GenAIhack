@@ -13,11 +13,22 @@ export async function POST(req: Request) {
   try {
     // Verify request is from Vapi
     const authorization = req.headers.get('authorization');
-    logWebhookInfo('Auth header', { received: !!authorization, expected: `Bearer ${VAPI_CONFIG.apiKey.substring(0, 5)}...` });
+    const vapiSecret = req.headers.get('x-vapi-secret');
     
-    if (!authorization || authorization !== `Bearer ${VAPI_CONFIG.apiKey}`) {
-      logWebhookInfo('Unauthorized request');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    logWebhookInfo('Auth headers', { 
+      hasAuthorization: !!authorization, 
+      hasVapiSecret: !!vapiSecret
+    });
+    
+    // Check authorization header
+    if (VAPI_CONFIG.apiKey && (!authorization || authorization !== `Bearer ${VAPI_CONFIG.apiKey}`)) {
+      // Only enforce this check if we have an API key configured
+      if (process.env.NODE_ENV === 'production') {
+        logWebhookInfo('Unauthorized request - invalid Authorization header');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      } else {
+        logWebhookInfo('Warning: Authorization header invalid but continuing in development mode');
+      }
     }
 
     // Parse the request body
@@ -47,10 +58,10 @@ export async function POST(req: Request) {
         
         try {
           // Extract user ID from custom data if available
-          const userId = body.call.custom_data?.userId;
-          const hackathonId = body.call.custom_data?.hackathonId;
+          const userId = body.call.custom_data?.userId || body.call.custom_data?.user_id;
+          const hackathonId = body.call.custom_data?.hackathonId || body.call.custom_data?.hackathon_id;
           
-          logWebhookInfo('User data', { userId, hackathonId });
+          logWebhookInfo('User data', { userId, hackathonId, custom_data: body.call.custom_data });
 
           if (userId) {
             // Store the transcript in Supabase
