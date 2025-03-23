@@ -5,11 +5,11 @@
   "framework": "nextjs",
   "outputDirectory": ".next",
   "functions": {
-    "api/public-webhook/**": {
+    "src/app/api/public-webhook/**": {
       "memory": 1024,
       "maxDuration": 10
     },
-    "api/test-webhook/**": {
+    "src/app/api/test-webhook/**": {
       "memory": 1024,
       "maxDuration": 10
     }
