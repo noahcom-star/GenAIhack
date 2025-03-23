@@ -71,8 +71,7 @@ export default function VoiceRegistration({
       )}
       
       <p className="mt-4 text-sm text-gray-600">
-        Click the button above to start a voice call with our AI assistant. 
-        They'll ask you about your skills, interests, and what you'd like to build.
+        {callId ? 'Call in progress!' : 'Click the button above to start a voice call with our AI assistant. They&apos;ll ask you about your skills, interests, and what you&apos;d like to build.'}
       </p>
     </div>
   );

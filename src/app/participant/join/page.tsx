@@ -49,6 +49,10 @@ export default function JoinHackathon() {
         <p className="mt-4 text-sm text-gray-600 text-center">
           Don't have a code? Ask your hackathon organizer for one.
         </p>
+
+        <p className="mt-4 text-sm text-gray-600 text-center">
+          We&apos;re excited to have you join us!
+        </p>
       </div>
     </div>
   );
