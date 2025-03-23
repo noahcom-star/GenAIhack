@@ -65,20 +65,41 @@ export async function POST(req: Request) {
             }
 
             // Extract skills and interests
-            const skills = extractSkills(transcript.text);
-            const interests = extractInterests(transcript.text);
+            const newSkills = extractSkills(transcript.text);
+            const newInterests = extractInterests(transcript.text);
             
-            console.log('[PUBLIC WEBHOOK] Extracted profile data', { skills, interests });
+            console.log('[PUBLIC WEBHOOK] Extracted profile data', { skills: newSkills, interests: newInterests });
             
-            // Update user profile in Supabase
-            if (skills.length > 0 || interests.length > 0) {
-              console.log('[PUBLIC WEBHOOK] Updating participant profile');
+            // Get existing profile
+            const { data: existingProfile } = await supabase
+              .from('participant_profiles')
+              .select('skills, interests')
+              .eq('user_id', userId)
+              .single();
+
+            // Merge existing and new skills/interests
+            const mergedSkills = Array.from(new Set([
+              ...(existingProfile?.skills || []),
+              ...newSkills
+            ]));
+            const mergedInterests = Array.from(new Set([
+              ...(existingProfile?.interests || []),
+              ...newInterests
+            ]));
+            
+            // Update user profile in Supabase if we have new data
+            if (newSkills.length > 0 || newInterests.length > 0) {
+              console.log('[PUBLIC WEBHOOK] Updating participant profile', {
+                mergedSkills,
+                mergedInterests
+              });
+              
               const { error: profileError } = await supabase
                 .from('participant_profiles')
                 .upsert({
                   user_id: userId,
-                  skills: skills,
-                  interests: interests,
+                  skills: mergedSkills,
+                  interests: mergedInterests,
                   updated_at: new Date().toISOString()
                 });
 
