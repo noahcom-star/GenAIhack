@@ -35,7 +35,12 @@ export default function VoiceRegistration({
       console.log('Call started with ID:', newCallId);
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start registration');
+      console.error('Voice registration error:', err);
+      if (err instanceof Error && err.message.includes('VAPI API key is not configured')) {
+        setError('Voice registration is currently unavailable. Please try again later or contact support.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to start registration');
+      }
     } finally {
       setIsLoading(false);
     }

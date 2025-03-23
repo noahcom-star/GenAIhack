@@ -2,6 +2,11 @@ import { VAPI_CONFIG, type VapiTranscript, type ParsedProfile } from './config';
 
 export async function parseTranscript(transcript: VapiTranscript): Promise<ParsedProfile> {
   try {
+    // Check if VAPI API key is available
+    if (!VAPI_CONFIG.apiKey) {
+      throw new Error('VAPI API key is not configured');
+    }
+
     const prompt = `
       Parse the following transcript into structured data about a hackathon participant.
       Extract their name, skills, interests, and create a brief summary.
@@ -44,6 +49,11 @@ export async function parseTranscript(transcript: VapiTranscript): Promise<Parse
 
 export async function startVapiCall(): Promise<string> {
   try {
+    // Check if VAPI API key is available
+    if (!VAPI_CONFIG.apiKey) {
+      throw new Error('VAPI API key is not configured');
+    }
+
     const response = await fetch('https://api.vapi.ai/call', {
       method: 'POST',
       headers: {
