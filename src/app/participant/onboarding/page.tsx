@@ -27,7 +27,7 @@ export default function ParticipantOnboarding() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError) {
-        console.error('Auth error:', userError);
+        console.error('Auth error:', userError.message);
         throw new Error(`Authentication error: ${userError.message}`);
       }
       
@@ -36,27 +36,24 @@ export default function ParticipantOnboarding() {
       }
 
       console.log('Current user:', user.id);
-
-      // Check if profile already exists
-      const { data: existingProfile, error: fetchError } = await supabase
+      
+      // For debugging: check table exists
+      const { error: tableError } = await supabase
         .from('participant_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error checking for existing profile:', fetchError);
-        throw new Error(`Error checking profile: ${fetchError.message}`);
+        .select('count')
+        .limit(1);
+        
+      if (tableError) {
+        console.error('Table access error:', tableError.message, tableError.details, tableError.hint);
+        throw new Error(`Error accessing table: ${tableError.message}`);
       }
-
-      console.log('Existing profile:', existingProfile);
 
       // Prepare profile data
       const profileData = {
         user_id: user.id,
-        linkedin_url: formData.linkedIn,
-        github_url: formData.github,
-        portfolio_url: formData.portfolio,
+        linkedin_url: formData.linkedIn || null,
+        github_url: formData.github || null,
+        portfolio_url: formData.portfolio || null,
         skills: formData.skills,
         interests: formData.interests,
         experience_level: formData.experience,
@@ -66,16 +63,22 @@ export default function ParticipantOnboarding() {
       console.log('Saving profile data:', profileData);
 
       // Update participant profile
-      const { data: result, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('participant_profiles')
-        .upsert(profileData);
+        .insert(profileData)
+        .select();
 
       if (updateError) {
-        console.error('Profile update error:', updateError);
-        throw updateError;
+        console.error('Profile update error:', 
+          updateError.message, 
+          updateError.code, 
+          updateError.details, 
+          updateError.hint
+        );
+        throw new Error(`Error saving profile: ${updateError.message}`);
       }
 
-      console.log('Profile saved successfully:', result);
+      console.log('Profile saved successfully');
 
       // Redirect to dashboard
       router.push('/participant/dashboard');

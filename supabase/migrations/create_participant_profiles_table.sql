@@ -16,10 +16,11 @@ CREATE TABLE public.participant_profiles (
 -- Add row-level security policies
 ALTER TABLE public.participant_profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies that allow users to read, update, or insert only their own profile
-CREATE POLICY "Users can view own profile" ON public.participant_profiles 
-  FOR SELECT USING (auth.uid() = user_id);
+-- Allow authenticated users to see all profiles
+CREATE POLICY "Authenticated users can view all profiles" ON public.participant_profiles 
+  FOR SELECT USING (auth.role() = 'authenticated');
 
+-- Allow users to update or insert their own profile
 CREATE POLICY "Users can update own profile" ON public.participant_profiles 
   FOR UPDATE USING (auth.uid() = user_id);
 
