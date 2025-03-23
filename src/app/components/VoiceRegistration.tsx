@@ -15,7 +15,14 @@ export default function VoiceRegistration({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
   const { user } = useAuth();
+
+  const validatePhoneNumber = (number: string) => {
+    // Basic phone number validation
+    const cleaned = number.replace(/\D/g, '');
+    return cleaned.length >= 10;
+  };
 
   const startRegistration = async () => {
     try {
@@ -25,13 +32,21 @@ export default function VoiceRegistration({
       if (!user) {
         throw new Error('You must be logged in to use voice registration');
       }
+
+      if (!validatePhoneNumber(phoneNumber)) {
+        throw new Error('Please enter a valid phone number');
+      }
       
       console.log('Starting voice registration with user ID:', user.id, 'and hackathon ID:', hackathonId);
+      
+      // Format phone number to E.164 format
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber.replace(/\D/g, '')}`;
       
       // Start the Vapi call with user and hackathon IDs
       const newCallId = await startVapiCall({
         userId: user.id,
-        hackathonId
+        hackathonId,
+        phoneNumber: formattedPhone
       });
       
       setCallId(newCallId);
@@ -69,13 +84,31 @@ export default function VoiceRegistration({
           <p className="text-sm mt-2">Call ID: {callId}</p>
         </div>
       ) : (
-        <button
-          onClick={startRegistration}
-          disabled={isLoading}
-          className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
-        >
-          {isLoading ? 'Starting Call...' : 'Start Voice Registration'}
-        </button>
+        <div>
+          <div className="mb-4">
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter your phone number"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Format: (123) 456-7890 or +1234567890
+            </p>
+          </div>
+          <button
+            onClick={startRegistration}
+            disabled={isLoading || !phoneNumber}
+            className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 disabled:bg-blue-400 w-full"
+          >
+            {isLoading ? 'Starting Call...' : 'Start Voice Registration'}
+          </button>
+        </div>
       )}
     </div>
   );

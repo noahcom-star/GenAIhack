@@ -47,7 +47,11 @@ export async function parseTranscript(transcript: VapiTranscript): Promise<Parse
   }
 }
 
-export async function startVapiCall(customData?: { userId: string; hackathonId: string }): Promise<string> {
+export async function startVapiCall(customData: { 
+  userId: string; 
+  hackathonId: string;
+  phoneNumber: string;
+}): Promise<string> {
   try {
     // Check if VAPI API key is available
     if (!VAPI_CONFIG.apiKey) {
@@ -64,9 +68,13 @@ export async function startVapiCall(customData?: { userId: string; hackathonId: 
       },
       body: JSON.stringify({
         assistant_id: VAPI_CONFIG.assistantId,
-        caller_number: '+1234567890', // This should be provided by the user
+        caller_number: customData.phoneNumber,
+        from_number: '+12494920940', // Our VAPI phone number
         initial_message: "Hi! I'm your HackBuddy assistant. Please tell me about yourself, including your name, skills, and what kind of projects you're interested in building.",
-        custom_data: customData || {}
+        custom_data: {
+          userId: customData.userId,
+          hackathonId: customData.hackathonId
+        }
       }),
     });
 
