@@ -47,7 +47,7 @@ export async function parseTranscript(transcript: VapiTranscript): Promise<Parse
   }
 }
 
-export async function startVapiCall(): Promise<string> {
+export async function startVapiCall(customData?: { userId: string; hackathonId: string }): Promise<string> {
   try {
     // Check if VAPI API key is available
     if (!VAPI_CONFIG.apiKey) {
@@ -64,6 +64,7 @@ export async function startVapiCall(): Promise<string> {
         assistant_id: VAPI_CONFIG.assistantId,
         caller_number: '+1234567890', // This should be provided by the user
         initial_message: "Hi! I'm your HackBuddy assistant. Please tell me about yourself, including your name, skills, and what kind of projects you're interested in building.",
+        custom_data: customData || {}
       }),
     });
 

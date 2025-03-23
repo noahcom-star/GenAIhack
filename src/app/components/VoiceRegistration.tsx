@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { startVapiCall } from '@/lib/vapi/utils';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function VoiceRegistration({
   hackathonId,
@@ -14,24 +15,24 @@ export default function VoiceRegistration({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const startRegistration = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // Start the Vapi call
-      const newCallId = await startVapiCall();
+      if (!user) {
+        throw new Error('You must be logged in to use voice registration');
+      }
+      
+      // Start the Vapi call with user and hackathon IDs
+      const newCallId = await startVapiCall({
+        userId: user.id,
+        hackathonId
+      });
+      
       setCallId(newCallId);
-      
-      // Here you would typically:
-      // 1. Wait for the call to complete
-      // 2. Get the transcript
-      // 3. Parse the profile data
-      // 4. Save to Supabase
-      // 5. Call onComplete()
-      
-      // For now, we'll just show the call ID
       console.log('Call started with ID:', newCallId);
       
     } catch (err) {

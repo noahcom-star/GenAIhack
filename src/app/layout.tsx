@@ -1,5 +1,8 @@
-import { Inter } from 'next/font/google';
+'use client';
+
 import './globals.css';
+import { Inter } from 'next/font/google';
+import { AuthProvider } from '@/lib/contexts/AuthContext';
 import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -17,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <Suspense fallback={<div>Loading...</div>}>
-          {children}
-        </Suspense>
+        <AuthProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            {children}
+          </Suspense>
+        </AuthProvider>
       </body>
     </html>
   );
