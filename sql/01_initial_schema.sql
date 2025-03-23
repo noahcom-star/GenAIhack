@@ -8,7 +8,7 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
-DO $$ BEGIN
+DO $$ BEGI
     CREATE TYPE participant_status AS ENUM ('pending', 'active', 'matched');
 EXCEPTION
     WHEN duplicate_object THEN null;
