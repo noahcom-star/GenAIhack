@@ -12,9 +12,6 @@ export default function ParticipantOnboarding() {
     linkedIn: '',
     github: '',
     portfolio: '',
-    skills: '',
-    interests: '',
-    experience: '',
   });
   const supabase = getSupabaseClient();
 
@@ -37,26 +34,12 @@ export default function ParticipantOnboarding() {
 
       console.log('Current user:', user.id);
       
-      // For debugging: check table exists
-      const { error: tableError } = await supabase
-        .from('participant_profiles')
-        .select('count')
-        .limit(1);
-        
-      if (tableError) {
-        console.error('Table access error:', tableError.message, tableError.details, tableError.hint);
-        throw new Error(`Error accessing table: ${tableError.message}`);
-      }
-
       // Prepare profile data
       const profileData = {
         user_id: user.id,
         linkedin_url: formData.linkedIn || null,
         github_url: formData.github || null,
         portfolio_url: formData.portfolio || null,
-        skills: formData.skills,
-        interests: formData.interests,
-        experience_level: formData.experience,
         onboarding_completed: true,
       };
 
@@ -90,7 +73,7 @@ export default function ParticipantOnboarding() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -102,6 +85,9 @@ export default function ParticipantOnboarding() {
       <div className="max-w-2xl mx-auto">
         <div className="bg-white p-8 rounded-lg shadow">
           <h1 className="text-3xl font-bold text-center mb-8">Complete Your Profile</h1>
+          <p className="mb-6 text-center text-gray-600">
+            Add your professional profiles (all fields are optional)
+          </p>
           
           {error && (
             <div className="mb-6 p-4 bg-red-100 text-red-700 rounded">
@@ -150,54 +136,6 @@ export default function ParticipantOnboarding() {
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="https://yourportfolio.com"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skills (comma separated)
-              </label>
-              <input
-                type="text"
-                name="skills"
-                value={formData.skills}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="React, TypeScript, Node.js, Python..."
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Interests
-              </label>
-              <textarea
-                name="interests"
-                value={formData.interests}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="What kind of projects are you interested in?"
-                rows={3}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Experience Level
-              </label>
-              <select
-                name="experience"
-                value={formData.experience}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select your experience level</option>
-                <option value="beginner">Beginner (0-2 years)</option>
-                <option value="intermediate">Intermediate (2-5 years)</option>
-                <option value="advanced">Advanced (5+ years)</option>
-              </select>
             </div>
 
             <button
