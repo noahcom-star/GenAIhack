@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { getAuthRedirectUrl } from '@/lib/utils/auth';
 
 export default function SignIn() {
@@ -15,7 +14,7 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const supabaseClient = createClientComponentClient();
+  const supabase = getSupabaseClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +25,7 @@ export default function SignIn() {
       console.log('Attempting to sign in with:', email);
       
       // Sign in with Supabase Auth
-      const { data: { user }, error: signInError } = await supabaseClient.auth.signInWithPassword({
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -123,7 +122,7 @@ export default function SignIn() {
 
     try {
       // Sign up with Supabase Auth
-      const { data, error: signUpError } = await supabaseClient.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -163,7 +162,7 @@ export default function SignIn() {
   };
 
   const handleGitHubSignIn = async () => {
-    const { error } = await supabaseClient.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
         redirectTo: getAuthRedirectUrl()

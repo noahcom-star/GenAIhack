@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useDeepgram } from '../lib/contexts/DeepgramContext';
 import { motion } from 'framer-motion';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 export default function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const { connectToDeepgram, disconnectFromDeepgram, connectionState, realtimeTranscript } = useDeepgram();
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseClient();
 
   const handleStartRecording = async () => {
     await connectToDeepgram();

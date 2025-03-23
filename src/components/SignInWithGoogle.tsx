@@ -1,11 +1,11 @@
 "use client";
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function SignInWithGoogle() {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseClient();
   const router = useRouter();
 
   const signInWithGoogle = async () => {
