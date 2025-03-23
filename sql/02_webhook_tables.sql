@@ -1,3 +1,9 @@
+-- Drop existing tables and triggers if they exist
+drop trigger if exists set_timestamp_participant_conversations on participant_conversations;
+drop trigger if exists set_timestamp_participant_profiles on participant_profiles;
+drop table if exists participant_conversations;
+drop table if exists participant_profiles;
+
 -- Create participant_conversations table
 create table if not exists participant_conversations (
   id uuid primary key default uuid_generate_v4(),
@@ -10,7 +16,7 @@ create table if not exists participant_conversations (
   updated_at timestamp with time zone default now()
 );
 
--- Create participant_profiles table if it doesn't exist
+-- Create participant_profiles table
 create table if not exists participant_profiles (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users not null,
