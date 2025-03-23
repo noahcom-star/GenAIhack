@@ -1,48 +1,73 @@
-import Link from "next/link";
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleChoice = async (role: 'organizer' | 'participant') => {
+    // Store the selected role in the URL when redirecting to sign in
+    router.push(`/auth/signin?role=${role}`);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-8">
-      <div>
-        <h2 className="text-2xl font-semibold text-center border p-4 font-mono rounded-md">
-          Get started by choosing a template path from the /paths/ folder.
-        </h2>
-      </div>
-      <div>
-        <h1 className="text-6xl font-bold text-center">Make anything you imagine 🪄</h1>
-        <h2 className="text-2xl text-center font-light text-gray-500 pt-4">
-          This whole page will be replaced when you run your template path.
-        </h2>
-      </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Chat App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            An intelligent conversational app powered by AI models, featuring real-time responses
-            and seamless integration with Next.js and various AI providers.
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-4xl mx-auto px-4 py-16">
+        <h1 className="text-5xl font-bold text-center mb-4">Welcome to HackBuddy</h1>
+        <p className="text-xl text-gray-600 text-center mb-12">
+          Choose how you'd like to get started
+        </p>
+
+        <div className="flex flex-col md:flex-row gap-6 justify-center mb-16">
+          <button
+            onClick={() => handleChoice('organizer')}
+            className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 text-center flex-1 max-w-md border-2 border-transparent hover:border-blue-600"
+          >
+            <h2 className="text-2xl font-semibold mb-2 text-blue-600">Organize a Hackathon</h2>
+            <p className="text-gray-600 mb-4">
+              Create and manage hackathon events, review participants, and more.
+            </p>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+              Get Started →
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleChoice('participant')}
+            className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 text-center flex-1 max-w-md border-2 border-transparent hover:border-purple-600"
+          >
+            <h2 className="text-2xl font-semibold mb-2 text-purple-600">Join a Hackathon</h2>
+            <p className="text-gray-600 mb-4">
+              Find the perfect teammates, showcase your skills, and participate in exciting events.
+            </p>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+              Get Started →
+            </div>
+          </button>
         </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Image Generation App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Create images from text prompts using AI, powered by the Replicate API and Next.js.
-          </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="text-center">
+            <h3 className="font-medium mb-2">Smart Matching</h3>
+            <p className="text-gray-600">
+              Simply talk to our AI assistant about your skills and interests.
+            </p>
+          </div>
+          <div className="text-center">
+            <h3 className="font-medium mb-2">Perfect Teams</h3>
+            <p className="text-gray-600">
+              Get matched with teammates who complement your skills and share your interests.
+            </p>
+          </div>
+          <div className="text-center">
+            <h3 className="font-medium mb-2">Seamless Experience</h3>
+            <p className="text-gray-600">
+              Making team formation accessible and effective for everyone.
+            </p>
+          </div>
         </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Social Media App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A feature-rich social platform with user profiles, posts, and interactions using
-            Firebase and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Voice Notes App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A voice-based note-taking app with real-time transcription using Deepgram API, 
-            Firebase integration for storage, and a clean, simple interface built with Next.js.
-          </p>
-        </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
