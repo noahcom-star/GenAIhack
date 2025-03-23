@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 
 export default function ParticipantOnboarding() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function ParticipantOnboarding() {
     interests: '',
     experience: '',
   });
+  const supabase = getSupabaseClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,27 +24,58 @@ export default function ParticipantOnboarding() {
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Auth error:', userError);
+        throw new Error(`Authentication error: ${userError.message}`);
+      }
       
       if (!user) {
-        throw new Error('No user found');
+        throw new Error('No user found. Please sign in again.');
       }
 
-      // Update participant profile
-      const { error: updateError } = await supabase
-        .from('participant_profiles')
-        .upsert({
-          user_id: user.id,
-          linkedin_url: formData.linkedIn,
-          github_url: formData.github,
-          portfolio_url: formData.portfolio,
-          skills: formData.skills,
-          interests: formData.interests,
-          experience_level: formData.experience,
-          onboarding_completed: true,
-        });
+      console.log('Current user:', user.id);
 
-      if (updateError) throw updateError;
+      // Check if profile already exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('participant_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error checking for existing profile:', fetchError);
+        throw new Error(`Error checking profile: ${fetchError.message}`);
+      }
+
+      console.log('Existing profile:', existingProfile);
+
+      // Prepare profile data
+      const profileData = {
+        user_id: user.id,
+        linkedin_url: formData.linkedIn,
+        github_url: formData.github,
+        portfolio_url: formData.portfolio,
+        skills: formData.skills,
+        interests: formData.interests,
+        experience_level: formData.experience,
+        onboarding_completed: true,
+      };
+
+      console.log('Saving profile data:', profileData);
+
+      // Update participant profile
+      const { data: result, error: updateError } = await supabase
+        .from('participant_profiles')
+        .upsert(profileData);
+
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
+
+      console.log('Profile saved successfully:', result);
 
       // Redirect to dashboard
       router.push('/participant/dashboard');
