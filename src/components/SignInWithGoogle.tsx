@@ -1,10 +1,25 @@
 "use client";
 
-import { useAuth } from '../lib/hooks/useAuth';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function SignInWithGoogle() {
-  const { signInWithGoogle } = useAuth();
+  const supabase = createClientComponentClient();
+  const router = useRouter();
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    
+    if (error) {
+      console.error('Error signing in with Google:', error);
+    }
+  };
 
   return (
     <button
