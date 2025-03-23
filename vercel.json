@@ -8,12 +8,21 @@
     "api/public-webhook/**": {
       "memory": 1024,
       "maxDuration": 10
+    },
+    "api/test-webhook/**": {
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "routes": [
     {
       "src": "/api/public-webhook(.*)",
       "dest": "/api/public-webhook$1",
+      "continue": true
+    },
+    {
+      "src": "/api/test-webhook(.*)",
+      "dest": "/api/test-webhook$1",
       "continue": true
     },
     {
