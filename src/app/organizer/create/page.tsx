@@ -81,7 +81,11 @@ export default function CreateHackathon() {
         }
       }
 
-      setCreatedHackathon(hackathon);
+      // Cast the hackathon data with proper types
+      setCreatedHackathon({
+        id: hackathon.id as string,
+        join_code: hackathon.join_code as string
+      });
     } catch (err) {
       console.error('Creation error:', err);
       setError(err instanceof Error ? err.message : 'Failed to create hackathon');
@@ -123,7 +127,7 @@ export default function CreateHackathon() {
           
           <div className="space-x-4">
             <button
-              onClick={() => router.push(`/organizer/hackathon/${createdHackathon.id}`)}
+              onClick={() => router.push(`/organizer/hackathons/${createdHackathon.id}`)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Go to Dashboard
