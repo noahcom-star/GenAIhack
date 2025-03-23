@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { getSupabaseClient } from '@/lib/supabase/client';
-import { VAPI_CONFIG, ParsedProfile } from '@/lib/vapi/config';
+import { getServerSupabaseClient } from '@/lib/supabase/client';
+import { VAPI_CONFIG } from '@/lib/vapi/config';
 
-// Helper function to log important information
-function logWebhookInfo(message: string, data?: any) {
-  console.log(`[VAPI WEBHOOK] ${message}`, data ? JSON.stringify(data) : '');
-}
+// Simple logging helper
+const logWebhookInfo = (message: string, data?: any) => {
+  console.log('[VAPI WEBHOOK]', message, data ? data : '');
+};
 
 export async function POST(req: Request) {
   logWebhookInfo('Webhook received');
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     });
 
     // Initialize Supabase
-    const supabase = getSupabaseClient();
+    const supabase = getServerSupabaseClient();
     logWebhookInfo('Supabase client initialized');
 
     // Handle different event types
@@ -58,8 +58,8 @@ export async function POST(req: Request) {
         
         try {
           // Extract user ID from custom data if available
-          const userId = body.call.custom_data?.userId || body.call.custom_data?.user_id;
-          const hackathonId = body.call.custom_data?.hackathonId || body.call.custom_data?.hackathon_id;
+          const userId = body.call.custom_data?.userId;
+          const hackathonId = body.call.custom_data?.hackathonId;
           
           logWebhookInfo('User data', { userId, hackathonId, custom_data: body.call.custom_data });
 
@@ -72,57 +72,36 @@ export async function POST(req: Request) {
                 user_id: userId,
                 hackathon_id: hackathonId,
                 transcript: transcript.text,
-                call_id: body.call.id,
-                confidence: transcript.confidence
+                confidence: transcript.confidence,
+                created_at: new Date().toISOString()
               })
               .select();
 
             if (transcriptError) {
               logWebhookInfo('Error saving transcript', transcriptError);
-            } else {
-              logWebhookInfo('Transcript saved successfully', { insertId: insertData?.[0]?.id });
+              return NextResponse.json({ error: 'Failed to save transcript' }, { status: 500 });
             }
 
-            // Extract skills and interests
-            const skills = extractSkills(transcript.text);
-            const interests = extractInterests(transcript.text);
-            
-            logWebhookInfo('Extracted profile data', { skills, interests });
-            
-            // Update user profile in Supabase
-            if (skills.length > 0 || interests.length > 0) {
-              logWebhookInfo('Updating participant profile');
-              const { error: profileError } = await supabase
-                .from('participant_profiles')
-                .upsert({
-                  user_id: userId,
-                  skills: skills,
-                  interests: interests,
-                  updated_at: new Date().toISOString()
-                });
-
-              if (profileError) {
-                logWebhookInfo('Error updating profile', profileError);
-              } else {
-                logWebhookInfo('Profile updated successfully');
-              }
-            }
+            logWebhookInfo('Transcript saved successfully', { insertId: insertData?.[0]?.id });
+            return NextResponse.json({ success: true });
           } else {
-            logWebhookInfo('No user_id found in custom_data, skipping database updates');
+            logWebhookInfo('No user_id found in custom_data, skipping database update');
+            return NextResponse.json({ error: 'Missing user_id in custom_data' }, { status: 400 });
           }
         } catch (error) {
           logWebhookInfo('Error processing transcript', error);
+          return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
         }
       } else {
         logWebhookInfo('No transcript available in completed call');
+        return NextResponse.json({ error: 'No transcript in call data' }, { status: 400 });
       }
     } else {
       logWebhookInfo('Non-completed call event received', { type: body.type });
+      return NextResponse.json({ success: true });
     }
-
-    return NextResponse.json({ success: true });
   } catch (error) {
-    logWebhookInfo('Error in Vapi webhook', error);
+    logWebhookInfo('Error in webhook', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

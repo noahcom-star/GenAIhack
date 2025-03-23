@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getServerSupabaseClient } from '@/lib/supabase/client';
 
 // Set a secret key for validating webhook requests
 // This should match what you set in Vapi dashboard
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     logWebhookInfo('Request body:', body);
 
     // Initialize Supabase
-    const supabase = getSupabaseClient();
+    const supabase = getServerSupabaseClient();
     logWebhookInfo('Supabase client initialized');
 
     // Handle different event types
