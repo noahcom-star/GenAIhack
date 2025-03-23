@@ -16,7 +16,7 @@ export default function Home() {
       <main className="max-w-4xl mx-auto px-4 py-16">
         <h1 className="text-5xl font-bold text-center mb-4">Welcome to HackBuddy</h1>
         <p className="text-xl text-gray-600 text-center mb-12">
-          Choose how you'd like to get started
+          Choose how you&apos;d like to get started
         </p>
 
         <div className="flex flex-col md:flex-row gap-6 justify-center mb-16">
