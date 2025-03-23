@@ -26,8 +26,8 @@ export default function WebhookTestPage() {
               confidence: 0.9
             },
             custom_data: {
-              userId: 'test-user-id',
-              hackathonId: 'test-hackathon-id'
+              userId: '123e4567-e89b-12d3-a456-426614174000',
+              hackathonId: '123e4567-e89b-12d3-a456-426614174001'
             }
           }
         })
