@@ -15,6 +15,11 @@
       "src": "/api/public-webhook(.*)",
       "dest": "/api/public-webhook$1",
       "continue": true
+    },
+    {
+      "src": "/webhook-test",
+      "dest": "/webhook-test",
+      "continue": true
     }
   ]
 } 
