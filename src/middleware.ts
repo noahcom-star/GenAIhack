@@ -8,7 +8,10 @@ const PUBLIC_ROUTES = [
   '/auth/signin',
   '/auth/signup',
   '/auth/callback',
-  '/auth/cookie'
+  '/auth/cookie',
+  '/api/webhook',
+  '/api/test-webhook',
+  '/webhook-test'
 ];
 
 export async function middleware(req: NextRequest) {
